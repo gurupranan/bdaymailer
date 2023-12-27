@@ -1,6 +1,8 @@
 import React from "react";
-import { getDatabase, ref, set } from 'firebase/database';
+import { getDatabase, ref, set, push, onValue, child} from 'firebase/database';
 import { initializeApp } from 'firebase/app';
+import $ from "jquery";
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyD27EFMpChpPEoTdwoN61TOzm9aU39K7f0",
@@ -14,19 +16,58 @@ const firebaseConfig = {
   };
   
   const app = initializeApp(firebaseConfig);
+   const db = getDatabase();
+
+
+   const dbRef = ref(db, "persons");
+ 
+   onValue(dbRef, (snapshot) => {
+    var header ="<tr><th>Name</th>       <th>Email</th>       <th>Date of Birth</th></tr>"
+    $(header).appendTo("#person");
+     snapshot.forEach((childSnapshot) => {
+       const childKey = childSnapshot.key;
+       const data = childSnapshot.val();
+
+       
+       var row = "<tr><td>" + data.name + "</td><td>"+ data.email + "</td><td>" + data.birth + "</td></tr>";
+
+       $(row).appendTo("#person");
+     });
+   },{
+    onlyOnce: true
+  });
+
+//   const starCountRef = ref(db, 'persons/');
+
+//   onValue(starCountRef, (snapshot) => {
+//     snapshot.forEach((childSnapshot) => {
+//     const data = snapshot.val();
+//     console.log(data.mail);
+    // var row = "<tr><td>" + data.birth + "</td><td>"+ data.email + "</td><td>" + data.name + "</td></tr>";
+    // $(row).appendTo("#person");
+//   }
+  
+//   );
+// })
+
+  
+
+
 
 function writeUserData(event) {
-  const db = getDatabase();
+
+    const userId = push(child(ref(db), "persons")).key;
   const name = document.getElementById("name").value;
   const mail = document.getElementById("mail").value;
   const dob = document.getElementById("dob").value;
 
   if (name && mail && dob) {
-    set(ref(db, 'persons/' + mail), {
-        username: name,
+    set(ref(db, 'persons/' + userId), {
+        name: name,
         email: mail,
         birth: dob
       })
+      alert("Data added");
       console.log("set executed");
   }
 
@@ -40,53 +81,32 @@ function writeUserData(event) {
 
 const InterfaceH = () => {
   return (
-    <div style={{ marginTop: '50px', marginRight: '40px' }}>
+    <div style={{ marginTop: '50px', marginRight: '80px' }}>
 
       <div style={{ textAlign: 'right', justifyContent: 'center' }}>
         <form>
-        <input style={{ width: '31%' }} type="text" id="name" name="name" placeholder="Enter your name" />
-        <input style={{ width: '31%' }} type="email" id="mail" name="email" placeholder="Enter your email" />
-        <input style={{ width: '31%' }} type="date" id="dob" name="date" placeholder="Select date of birth" />
+        <input style={{ width: '31%' , height: '40px'}} type="text" id="name" name="name" placeholder="Enter your name" />&nbsp;&nbsp;&nbsp;
+        <input style={{ width: '31%' , height: '40px'}} type="email" id="mail" name="email" placeholder="Enter your email" />&nbsp;&nbsp;&nbsp;
+        <input style={{ width: '31%' , height: '40px'}} type="text" id="dob" name="date" placeholder="Enter date of birth (dd-mm-yyyy)" />
         <br />
         <br />
-        <button style={{ width: '31.5%', backgroundColor: '#d9d9d9' }} type="reset" id="addRecord" onClick={writeUserData}>Add Record</button>
+        <button style={{ width: '31.25%', backgroundColor: '#d9d9d9' , height: '40px'}} type="reset" id="addRecord" onClick={writeUserData}>Add Record</button>
         </form>
       </div>
       <br />
-      <br />
 
-      <div style={{ textAlign: 'left', backgroundColor: '#d9d9d9' }}>
+      <div style={{ textAlign: 'center', marginLeft: '70px', backgroundColor: '#d9d9d9' }}>
         {/* Content inside the grey section goes here */}
-        <table style={{ width: '100%' }}>
+        <table id = "person" style={{ width: '100%', height: '50%', textAlign: 'left', margin: '70px'}}>
           <thead>
-            <tr>
-              <th>Header 1</th>
-              <th>Header 2</th>
-              <th>Header 3</th>
-            </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Data 1</td>
-              <td>Data 2</td>
-              <td>Data 3</td>
-            </tr>
-            <tr>
-              <td>Data 4</td>
-              <td>Data 5</td>
-              <td>Data 6</td>
-            </tr>
-            <tr>
-              <td>Data 7</td>
-              <td>Data 8</td>
-              <td>Data 9</td>
-            </tr>
           </tbody>
         </table>
       </div>
 
       <div style={{ textAlign: 'right', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'flex-end', height: '20%' }}>
-        <button style={{ position: 'fixed', bottom: '10px', right: '40px', width: '31%', backgroundColor: '#d9d9d9' }} type="submit" id="logout">Log Out</button>
+        <button style={{ position: 'fixed', bottom: '10px', right: '40px', width: '31%', backgroundColor: '#d9d9d9' , height: '40px'}} type="submit" id="logout">Log Out</button>
       </div>
     </div>
   );
