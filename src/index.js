@@ -15,3 +15,12 @@ root.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+// const catalyst = require('zcatalyst-sdk-node');
+// module.exports = (cronDetails, context) => 
+// {
+//   const app = catalyst.initialize(context);
+// //This app variable is used to access the catalyst components.
+// //You can refer the SDK docs for code samples.
+// //Your business logic comes here
+// }

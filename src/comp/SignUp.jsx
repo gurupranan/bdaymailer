@@ -1,6 +1,7 @@
 import React from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { Link, redirect, useNavigate } from 'react-router-dom';
 
 const firebaseConfig = {
     apiKey: "AIzaSyD27EFMpChpPEoTdwoN61TOzm9aU39K7f0",
@@ -52,7 +53,7 @@ function signUp(event) {
     });
 }
 
-const SignUpH = () => {
+const SignUp = () => {
   return (
     <body style={{ margin: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
       <div style={{ width: '50%', textAlign: 'center' }}>
@@ -69,10 +70,10 @@ const SignUpH = () => {
           <button type="submit" style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign Up with Google</button>
         </form>
         <br />
-        <p><a href="index.html">Sign in</a></p>
+        Already having an account?<Link to = "/" >Sign In</Link>
       </div>
     </body>
   );
 }
 
-export default SignUpH;
+export default SignUp;

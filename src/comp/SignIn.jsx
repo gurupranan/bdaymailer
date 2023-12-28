@@ -1,6 +1,7 @@
 import React from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider} from "firebase/auth";
+import { Link, redirect, useNavigate } from 'react-router-dom';
 
 const firebaseConfig = {
   apiKey: "AIzaSyD27EFMpChpPEoTdwoN61TOzm9aU39K7f0",
@@ -14,12 +15,13 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
+const provider = new GoogleAuthProvider();
 const auth = getAuth();
 
 
-function signIn(event){
+function signIn(event, navigate){
   event.preventDefault();
+
 const email=document.getElementById("email").value;
 const pswd=document.getElementById("pswd").value;
 
@@ -30,11 +32,12 @@ signInWithEmailAndPassword(auth, email, pswd)
   // Signed in 
   var user = userCredential.user;
   // ...
+  
+  
+  navigate("/add_record");
   console.log("thenin");
-})
-
-.catch((error) =>{
-  alert("email or password is wrong");
+}).catch((error) =>{
+  console.log(error);
 });
 console.log("thenout")
 
@@ -47,7 +50,8 @@ console.log("thenout")
 
 
 
-const Index = () => {
+const SignIn = () => {
+  const navigate = useNavigate();
   return (
     <div style={{ margin: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
 
@@ -65,7 +69,7 @@ const Index = () => {
 
           <input type="password" id="pswd" name="password" placeholder="Enter your password" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '5px' }} />
 
-          <button id="sign-in" type="button" onClick={signIn} style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign In</button>
+          <button id="sign-in" type="button" onClick={(event)=>signIn(event, navigate)} style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign In</button>
 
           <br />
           <br />
@@ -75,10 +79,10 @@ const Index = () => {
         </form>
 
         <br />
-        <p>Don't have an account? <a href = "#" >Sign Up</a></p>
+        Don't have an account? <Link to = "/signup" >Sign Up</Link>
       </div>
     </div>
   );
 }
 
-export default Index;
+export default SignIn;
