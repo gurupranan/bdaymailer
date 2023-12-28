@@ -51,7 +51,7 @@ const Interface = () => {
 
     if (name && mail && dob) {
       const userId = push(ref(db, "persons")).key;
-      set(ref(db, `persons/${userId}`), {
+      set(ref(db, 'persons/' + userId), {
         name: name,
         email: mail,
         birth: dob
@@ -92,7 +92,7 @@ const tableStyle = {
           <tbody>
             {persons.map((person, sno) => (
               <tr key={person.id}>
-                <td>{sno}</td>
+                <td>{sno+1}</td>
                 <td>{person.name}</td>
                 <td>{person.email}</td>
                 <td>{person.birth}</td>

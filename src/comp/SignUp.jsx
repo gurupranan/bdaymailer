@@ -27,7 +27,7 @@ function validatePassword(newPassword) {
   return newPassword.length >= 6;
 }
 
-function signUp(event) {
+function signUp(event, navigate) {
   event.preventDefault();
   const newEmail = document.getElementById("newEmail").value;
   const newPassword = document.getElementById("newPassword").value;
@@ -36,7 +36,7 @@ function signUp(event) {
     alert('Please make sure the password is at least 6 characters');
     return;
   }
-
+const test = user;
   if (!validateEmail(newEmail)) {
     alert('Please enter a valid email');
     return;
@@ -46,6 +46,7 @@ function signUp(event) {
     .then(function (userCredential) {
       var user = userCredential.user;
       alert("User creation is successful");
+      navigate("/");
       // Redirect or perform other actions upon successful user creation
     })
     .catch(function (error) {
@@ -54,6 +55,7 @@ function signUp(event) {
 }
 
 const SignUp = () => {
+  const navigate = useNavigate();
   return (
     <body style={{ margin: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
       <div style={{ width: '50%', textAlign: 'center' }}>
@@ -64,7 +66,7 @@ const SignUp = () => {
         <form>
           <input type="email" id="newEmail" name="email" placeholder="Enter your email" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '5px' }} />
           <input type="password" id="newPassword" name="password" placeholder="Enter your password" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '5px' }} />
-          <button onClick={signUp} type="button" style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign Up</button>
+          <button onClick={(event)=>signUp(event, navigate)} type="button" style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign Up</button>
           <br />
           <br />
           <button type="submit" style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign Up with Google</button>

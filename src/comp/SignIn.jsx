@@ -19,10 +19,12 @@ const provider = new GoogleAuthProvider();
 const auth = getAuth();
 
 
+
+
 function signIn(event, navigate){
   event.preventDefault();
 
-const email=document.getElementById("email").value;
+  const email=document.getElementById("email").value;
 const pswd=document.getElementById("pswd").value;
 
 
@@ -36,6 +38,9 @@ signInWithEmailAndPassword(auth, email, pswd)
   
   navigate("/add_record");
   console.log("thenin");
+  return email;
+  
+  
 }).catch((error) =>{
   console.log(error);
 });
@@ -84,5 +89,5 @@ const SignIn = () => {
     </div>
   );
 }
-
+export{signIn};
 export default SignIn;
