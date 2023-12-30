@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getDatabase, ref, set, push, onValue } from 'firebase/database';
 import { initializeApp } from 'firebase/app';
+import { getAuth, signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 
 const firebaseConfig = {
@@ -15,26 +17,45 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase();
+const db = getDatabase(app);
+const auth = getAuth(app);
 
 const Interface = () => {
+
+  const navigate = useNavigate();
+  const n1 = useNavigate();
   const [persons, setPersons] = useState([]); //comp state data value as empty array
+  
+  // if(!auth.currentUser){
+  //   //alert("Please signin to continue...")
+  //   navigate("/");
+  // }
+  
 
-  useEffect(() => {
-    const dbRef = ref(db, "persons");
 
-    const fetchData = () => {
-      onValue(dbRef, (snapshot) => {
-        const data = [];
-        snapshot.forEach((childSnapshot) => {
-          const childKey = childSnapshot.key;
-          const childData = childSnapshot.val();
-          data.push({...childData, id: childKey });
-        });
-        setPersons(data);
-      });
-    };
+  useEffect(() => { 
 
+    try{
+      var uId = auth.currentUser.uid;
+    }
+    catch(error){
+      alert("Please signin to continue...")
+      navigate("/");
+    }
+
+  const fetchData = () => {
+    
+    const dbRef = ref(db, 'users/' + uId);
+  onValue(dbRef, (snapshot) => {
+    const data = [];
+    snapshot.forEach((childSnapshot) => {
+      const childKey = childSnapshot.key;
+      const childData = childSnapshot.val();
+      data.push({...childData, id: childKey });
+    });
+    setPersons(data);
+  });
+  };
     fetchData();
 
     // return () => {
@@ -50,8 +71,9 @@ const Interface = () => {
     const dob = document.getElementById("dob").value;
 
     if (name && mail && dob) {
-      const userId = push(ref(db, "persons")).key;
-      set(ref(db, 'persons/' + userId), {
+      const uid = auth.currentUser.uid;
+      const userId = push(ref(db, 'listusers/'+ uid)).key;
+      set(ref(db, 'users/'+ uid + '/' + userId), {
         name: name,
         email: mail,
         birth: dob
@@ -63,6 +85,23 @@ const tableStyle = {
   height: 320,
   overflow: "auto",
 } 
+
+
+
+
+
+
+
+const logOut = (event) => {
+  signOut(auth).then(()=>{
+    navigate("/");
+    alert("Signed Out Successfully");
+  }).catch((error) => {
+    console.log(error);
+  })
+}
+
+
 
 
   return (
@@ -103,7 +142,7 @@ const tableStyle = {
       </div>
 
       <div style={{ textAlign: 'right', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'flex-end', height: '20%' }}>
-        <button style={{ position: 'fixed', bottom: '10px', right: '40px', width: '31%', backgroundColor: '#d9d9d9', height: '40px' }} type="submit" id="logout">Log Out</button>
+      <button style={{ position: 'fixed', bottom: '10px', right: '40px', width: '31%', backgroundColor: '#d9d9d9', height: '40px' }} type="submit" onClick={(event) => logOut(event, navigate)} id="logout">Log Out</button>
       </div>
     </div>
   );

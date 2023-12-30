@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider} from "firebase/auth";
+import { getAuth, signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult} from "firebase/auth";
 import { Link, redirect, useNavigate } from 'react-router-dom';
 
 const firebaseConfig = {
@@ -16,37 +16,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const provider = new GoogleAuthProvider();
-const auth = getAuth();
+var auth = getAuth();
+var user = auth.currentUser;
 
 
 
-
-function signIn(event, navigate){
-  event.preventDefault();
-
-  const email=document.getElementById("email").value;
-const pswd=document.getElementById("pswd").value;
-
-
-
-signInWithEmailAndPassword(auth, email, pswd)
-.then(function(userCredential){
-  // Signed in 
-  var user = userCredential.user;
-  // ...
-  
-  
-  navigate("/add_record");
-  console.log("thenin");
-  return email;
-  
-  
-}).catch((error) =>{
-  console.log(error);
-});
-console.log("thenout")
-
-}
 
 
 
@@ -57,6 +31,63 @@ console.log("thenout")
 
 const SignIn = () => {
   const navigate = useNavigate();
+ 
+
+
+  function signIn(event, navigate){
+    event.preventDefault();
+  
+    const email=document.getElementById("email").value;
+  const pswd=document.getElementById("pswd").value;
+  
+  
+  
+  signInWithEmailAndPassword(auth, email, pswd)
+  .then(function(userCredential){
+    // Signed in 
+    var auth = getAuth();
+    var user = auth.currentUser.email;
+    // ...
+    
+    navigate("/add_record");
+   
+    
+    
+    
+  }).catch((error) =>{
+    console.log(error);
+  });
+  //console.log("thenout")
+  
+  }
+
+
+
+
+  function signInG(event, navigate){
+    event.preventDefault();
+  console.log("genter");
+    signInWithPopup(auth, provider)
+    .then((result) => {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential.accessToken;
+      // The signed-in user info.
+      const user = result.user;
+      // IdP data available using getAdditionalUserInfo(result)
+      // ...
+      console.log(auth.currentUser.email);
+      navigate("/add_record");
+    console.log("gpass");
+    }).catch((error) => {
+      // Handle Errors here.
+      
+      console.log(error);
+  })
+  }
+
+
+  
   return (
     <div style={{ margin: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
 
@@ -79,7 +110,7 @@ const SignIn = () => {
           <br />
           <br />
 
-          <button type="submit" style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign in with Google</button>
+          <button type="submit" onClick={(event)=>signInG(event, navigate)} style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign in with Google</button>
 
         </form>
 
@@ -89,5 +120,7 @@ const SignIn = () => {
     </div>
   );
 }
-export{signIn};
+
+
+
 export default SignIn;

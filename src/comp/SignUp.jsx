@@ -1,7 +1,8 @@
 import React from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { Link, redirect, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { getDatabase, ref, set } from 'firebase/database';
 
 const firebaseConfig = {
     apiKey: "AIzaSyD27EFMpChpPEoTdwoN61TOzm9aU39K7f0",
@@ -36,7 +37,7 @@ function signUp(event, navigate) {
     alert('Please make sure the password is at least 6 characters');
     return;
   }
-const test = user;
+//const test = user;
   if (!validateEmail(newEmail)) {
     alert('Please enter a valid email');
     return;
@@ -45,19 +46,33 @@ const test = user;
   createUserWithEmailAndPassword(auth, newEmail, newPassword)
     .then(function (userCredential) {
       var user = userCredential.user;
+      
+    // console.log("in");
+        const db = getDatabase();
+        const email = auth.currentUser.email;
+        const uid = auth.currentUser.uid;
+        set(ref(db, 'users/' + uid), {
+          uid: uid,
+          email: email
+        });
+        
+          //console.log(auth.currentUser);
+
       alert("User creation is successful");
+
       navigate("/");
       // Redirect or perform other actions upon successful user creation
     })
     .catch(function (error) {
-      alert("User creation is unsuccessful :(");
+      console.log(error);
+      alert("User Already exist");
     });
 }
 
 const SignUp = () => {
   const navigate = useNavigate();
   return (
-    <body style={{ margin: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+    <div style={{ margin: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
       <div style={{ width: '50%', textAlign: 'center' }}>
         <h1>Wish your friends and family <br />Happy Birthday!</h1>
       </div>
@@ -74,7 +89,7 @@ const SignUp = () => {
         <br />
         Already having an account?<Link to = "/" >Sign In</Link>
       </div>
-    </body>
+    </div>
   );
 }
 
