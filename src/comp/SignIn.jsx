@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult} from "firebase/auth";
 import { Link, redirect, useNavigate } from 'react-router-dom';
+import { getDatabase, ref, set } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: "AIzaSyD27EFMpChpPEoTdwoN61TOzm9aU39K7f0",
@@ -35,7 +36,7 @@ const SignIn = () => {
 
 
   function signIn(event, navigate){
-    event.preventDefault();
+    //event.preventDefault();
   
     const email=document.getElementById("email").value;
   const pswd=document.getElementById("pswd").value;
@@ -56,6 +57,7 @@ const SignIn = () => {
     
   }).catch((error) =>{
     console.log(error);
+    alert("Email / Password is wrong");
   });
   //console.log("thenout")
   
@@ -66,7 +68,7 @@ const SignIn = () => {
 
   function signInG(event, navigate){
     event.preventDefault();
-  console.log("genter");
+  //console.log("genter");
     signInWithPopup(auth, provider)
     .then((result) => {
       // This gives you a Google Access Token. You can use it to access the Google API.
@@ -76,11 +78,20 @@ const SignIn = () => {
       const user = result.user;
       // IdP data available using getAdditionalUserInfo(result)
       // ...
-      console.log(auth.currentUser.email);
+      
+      const db = getDatabase();
+      const email = auth.currentUser.email;
+      const uid = auth.currentUser.uid;
+      set(ref(db, 'users/' + uid), {
+        uid: uid,
+        email: email
+      });
+      //console.log(auth.currentUser.email);
       navigate("/add_record");
-    console.log("gpass");
+    //console.log("gpass");
     }).catch((error) => {
       // Handle Errors here.
+      
       
       console.log(error);
   })
@@ -105,12 +116,12 @@ const SignIn = () => {
 
           <input type="password" id="pswd" name="password" placeholder="Enter your password" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '5px' }} />
 
-          <button id="sign-in" type="button" onClick={(event)=>signIn(event, navigate)} style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign In</button>
+          <button id="sign-in" type="reset" onClick={(event)=>signIn(event, navigate)} style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign In</button>
 
           <br />
           <br />
 
-          <button type="submit" onClick={(event)=>signInG(event, navigate)} style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign in with Google</button>
+          <button type="reset" onClick={(event)=>signInG(event, navigate)} style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign in with Google</button>
 
         </form>
 
