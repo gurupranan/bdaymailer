@@ -1,6 +1,6 @@
 import React from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo } from 'firebase/auth';
 import { Link, useNavigate } from 'react-router-dom';
 import { getDatabase, ref, set } from 'firebase/database';
 
@@ -17,6 +17,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
+const provider = new GoogleAuthProvider();
 
 function validateEmail(newEmail) {
   var expression = /^[^@]+@\w+(\.\w+)+\w$/;
@@ -58,7 +59,7 @@ function signUp(event, navigate) {
         
           //console.log(auth.currentUser);
 
-      alert("User creation is successful");
+      alert("Account created successfully");
 
       navigate("/");
       // Redirect or perform other actions upon successful user creation
@@ -69,6 +70,61 @@ function signUp(event, navigate) {
     });
 }
 
+
+function signUpG(event, navigate){
+  event.preventDefault();
+//console.log("genter");
+  signInWithPopup(auth, provider)
+  .then((result) => {
+    // This gives you a Google Access Token. You can use it to access the Google API.
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const token = credential.accessToken;
+    // The signed-in user info.
+    const user = result.user;
+    // IdP data available using getAdditionalUserInfo(result)
+    // ...
+    const newUser = getAdditionalUserInfo(result).isNewUser;
+
+
+
+    const db = getDatabase();
+    const email = auth.currentUser.email;
+    const uid = auth.currentUser.uid;
+    
+    if(newUser){set(ref(db, 'users/' + uid), {
+      uid: uid,
+      email: email
+    });
+
+    
+    navigate("/");
+    setTimeout(function() {
+      alert("Account created successfully. Please click 'Sign In With Google' to continue");
+    }, 1);
+  
+
+  }
+    else{
+      navigate("/");
+
+
+      setTimeout(function() {
+    alert("User Already exists. Please click 'Sign In With Google' to continue");
+  }, 1);
+      
+    }
+    //console.log(auth.currentUser.email);
+    
+  //console.log("gpass");
+  }).catch((error) => {
+    // Handle Errors here.
+    
+    
+    console.log(error);
+})
+}
+
+
 const SignUp = () => {
   const navigate = useNavigate();
   return (
@@ -77,14 +133,14 @@ const SignUp = () => {
         <h1>Wish your friends and family <br />Happy Birthday!</h1>
       </div>
       <div style={{ width: '21%', height: '60%', textAlign: 'center', border: '1px solid #ccc', padding: '20px', background: '#fbf9f9' }}>
-        <h2>Sign up</h2>
+        <h2>Sign Up</h2>
         <form>
           <input type="email" id="newEmail" name="email" placeholder="Enter your email" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '5px' }} />
           <input type="password" id="newPassword" name="password" placeholder="Enter your password" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '5px' }} />
           <button onClick={(event)=>signUp(event, navigate)} type="button" style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign Up</button>
           <br />
           <br />
-          <button type="submit" style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign Up with Google</button>
+          <button onClick={(event)=>signUpG(event, navigate)}type="submit" style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign Up With Google</button>
         </form>
         <br />
         Already having an account?<Link to = "/" >Sign In</Link>

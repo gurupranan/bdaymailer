@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult} from "firebase/auth";
+import { getAuth, signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithCredential, getAdditionalUserInfo, deleteUser} from "firebase/auth";
 import { Link, redirect, useNavigate } from 'react-router-dom';
 import { getDatabase, ref, set } from 'firebase/database';
 
@@ -47,7 +47,7 @@ const SignIn = () => {
   .then(function(userCredential){
     // Signed in 
     var auth = getAuth();
-    var user = auth.currentUser.email;
+    var user = auth.currentUser;
     // ...
     
     navigate("/add_record");
@@ -75,19 +75,35 @@ const SignIn = () => {
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential.accessToken;
       // The signed-in user info.
-      const user = result.user;
+      
       // IdP data available using getAdditionalUserInfo(result)
       // ...
       
       const db = getDatabase();
+      const user = auth.currentUser;
       const email = auth.currentUser.email;
       const uid = auth.currentUser.uid;
-      set(ref(db, 'users/' + uid), {
-        uid: uid,
-        email: email
-      });
+      const newUser = getAdditionalUserInfo(result).isNewUser;
+      if(newUser){
+        deleteUser(user).then(() => {
+          // User deleted.
+        });
+
+        navigate("/signup");
+
+
+        setTimeout(function() {
+      alert("User doesn't exist. Please click 'Sign Up With Google' to create account");
+    }, 1);
+
+
+      }
+      else{
+        navigate('/add_record');
+      }
+
       //console.log(auth.currentUser.email);
-      navigate("/add_record");
+      
     //console.log("gpass");
     }).catch((error) => {
       // Handle Errors here.
@@ -109,7 +125,7 @@ const SignIn = () => {
 
       {/* Right Section (40%) */}
       <div style={{ width: '21%', height: '60%', textAlign: 'center', border: '1px solid #ccc', padding: '20px', background: '#fbf9f9' }}>
-        <h2>Sign in</h2>
+        <h2>Sign In</h2>
         <form>
 
           <input type="email" id="email" name="email" placeholder="Enter your email" style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '5px' }} />
@@ -121,7 +137,7 @@ const SignIn = () => {
           <br />
           <br />
 
-          <button type="reset" onClick={(event)=>signInG(event, navigate)} style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign in with Google</button>
+          <button type="reset" onClick={(event)=>signInG(event, navigate)} style={{ width: '100%', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9' }}>Sign In With Google</button>
 
         </form>
 
