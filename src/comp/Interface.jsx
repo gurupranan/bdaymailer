@@ -33,35 +33,45 @@ const Interface = () => {
   
 
 
-  useEffect(() => { 
+  //useEffect(() => { 
 
     try{
       var uId = auth.currentUser.uid;
+      
     }
     catch(error){
       alert("Please signin to continue...")
       navigate("/");
     }
-
-  const fetchData = () => {
-    
     const dbRef = ref(db, 'users/' + uId);
-  onValue(dbRef, (snapshot) => {
-    const data = [];
-    snapshot.forEach((childSnapshot) => {
-      const childKey = childSnapshot.key;
-      const childData = childSnapshot.val();
-      data.push({...childData, id: childKey });
-    });
-    setPersons(data);
-  });
-  };
-    fetchData();
+    const fetchData = () => {
+      onValue(dbRef, (snapshot) => {
+        const data = [];
+        var sno = 0;
+        snapshot.forEach((childSnapshot) => {
+          sno = sno + 1;
+          const childKey = childSnapshot.key;
+          const childData = childSnapshot.val();
+          
+          if (typeof childData === 'object' && 'name' in childData && 'email' in childData && 'birth' in childData) {
+            data.push({ ...childData, id: childKey, sno: sno });
+          } 
+        });
+    
+        console.log("Data from Firebase:", data); // Add this line to log data
+    
+        setPersons(data);
+      });
+    };
+    
+
+  useEffect(() => {fetchData()}, [db]);
+    
 
     // return () => {
     //   console.log("retruncln");
     // };
-  }, [db]);//dependency array
+  //}, [db]);//dependency array
 
   const writeUserData = (event) => {
     //event.preventDefault();
@@ -129,15 +139,17 @@ const logOut = (event) => {
             </tr>
           </thead>
           <tbody>
-            {persons.map((person, sno) => (
-              <tr key={person.id}>
-                <td>{sno+1}</td>
-                <td>{person.name}</td>
-                <td>{person.email}</td>
-                <td>{person.birth}</td>
-              </tr>
-            ))}
-          </tbody>
+    {persons.map((person) => (
+      <tr key={person.id}>
+        <td>{person.sno}</td>
+        <td>{person.name}</td>
+        <td>{person.email}</td>
+        <td>{person.birth}</td>
+      </tr>
+    ))}
+  
+</tbody>
+
         </table>
       </div>
 
