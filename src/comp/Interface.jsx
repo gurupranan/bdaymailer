@@ -19,11 +19,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
-
+var nav = false;
 const Interface = () => {
 
   const navigate = useNavigate();
-  const n1 = useNavigate();
   const [persons, setPersons] = useState([]); //comp state data value as empty array
   
   // if(!auth.currentUser){
@@ -41,7 +40,7 @@ const Interface = () => {
     }
     catch(error){
       alert("Please signin to continue...")
-      navigate("/");
+      nav = true;
     }
     const dbRef = ref(db, 'users/' + uId);
     const fetchData = () => {
@@ -66,7 +65,7 @@ const Interface = () => {
     
 
   useEffect(() => {fetchData()}, [db]);
-    
+  useEffect(() => {if(nav){navigate("/");}})  
 
     // return () => {
     //   console.log("retruncln");
