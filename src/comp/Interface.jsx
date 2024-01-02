@@ -87,6 +87,13 @@ const Interface = () => {
         email: mail,
         birth: dob
       });
+      set(ref(db, 'mailerlist/'+ '/' + userId), {
+        name: name,
+        email: mail,
+        birth: dob
+      });
+
+
       alert("Data added");
     }
   };
