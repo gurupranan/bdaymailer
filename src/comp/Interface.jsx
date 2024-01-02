@@ -87,7 +87,7 @@ const Interface = () => {
       if(emailRegex.test(mail) && dobRegex.test(dob)){
       const uid = auth.currentUser.uid;
       const senderEmail = auth.currentUser.email;
-      const userId = push(ref(db, 'listusers/'+ uid)).key;
+      const userId = push(ref(db, 'users/'+ uid)).key;
       set(ref(db, 'users/'+ uid + '/' + userId), {
         name: name,
         email: mail,
