@@ -135,9 +135,9 @@ const logOut = (event) => {
     <div style={{ marginTop: '50px', marginRight: '80px' }}>
       <div style={{ textAlign: 'right', justifyContent: 'center' }}>
         <form>
-          <input style={{ width: '31%', height: '40px' }} type="text" id="name" name="name" placeholder="Person's name" />&nbsp;&nbsp;&nbsp;
-          <input style={{ width: '31%', height: '40px' }} type="email" id="mail" name="email" placeholder="Person's Email" />&nbsp;&nbsp;&nbsp;
-          <input style={{ width: '31%', height: '40px' }} type="text" id="dob" name="date" placeholder="Person's Date of Birth" />
+          <input style={{ width: '31%', height: '40px' }} type="text" id="name" name="name" placeholder="Person's name " />&nbsp;&nbsp;&nbsp;
+          <input style={{ width: '31%', height: '40px' }} type="email" id="mail" name="email" placeholder="Person's Email " />&nbsp;&nbsp;&nbsp;
+          <input style={{ width: '31%', height: '40px' }} type="text" id="dob" name="date" placeholder="Person's Date of Birth " />
           <br />
           <br />
           <button style={{ width: '31.25%', backgroundColor: '#d9d9d9', height: '40px' }} type="reset" id="addRecord" onClick={(event) => writeUserData(event)}>Add Record</button>
