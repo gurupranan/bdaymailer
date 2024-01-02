@@ -19,6 +19,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+
 var nav = false;
 const Interface = () => {
 
@@ -81,6 +82,7 @@ const Interface = () => {
 
     if (name && mail && dob) {
       const uid = auth.currentUser.uid;
+      const senderEmail = auth.currentUser.email;
       const userId = push(ref(db, 'listusers/'+ uid)).key;
       set(ref(db, 'users/'+ uid + '/' + userId), {
         name: name,
@@ -90,10 +92,11 @@ const Interface = () => {
       set(ref(db, 'mailerlist/'+ '/' + userId), {
         name: name,
         email: mail,
-        birth: dob
+        birth: dob,
+        senderemail: senderEmail
       });
 
-
+console.log(senderEmail, "senderemailda");
       alert("Data added");
     }
   };
