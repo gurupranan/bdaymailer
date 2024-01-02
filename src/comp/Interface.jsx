@@ -80,7 +80,11 @@ const Interface = () => {
     const mail = document.getElementById("mail").value;
     const dob = document.getElementById("dob").value;
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const dobRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+
     if (name && mail && dob) {
+      if(emailRegex.test(mail) && dobRegex.test(dob)){
       const uid = auth.currentUser.uid;
       const senderEmail = auth.currentUser.email;
       const userId = push(ref(db, 'listusers/'+ uid)).key;
@@ -99,6 +103,10 @@ const Interface = () => {
 console.log(senderEmail, "senderemailda");
       alert("Data added");
     }
+    else{
+      alert("Entered data in invalid");
+    }
+  }
   };
 const tableStyle = {
   height: 320,
