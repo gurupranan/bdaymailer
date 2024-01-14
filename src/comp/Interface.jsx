@@ -183,11 +183,12 @@ const [hist, setHist] = useState([]);
             if(dob.slice(0,5) == dateNow.slice(0,5)){
               
               const age = dateNow.slice(6, 10) - dob.slice(6,10);
+              console.log("ageeeee",age);
                   if(flag == "picpass"){
-                    instMailerLink = "https://project-rainfall-60026140571.development.catalystserverless.in/server/basicInsMailer/execute?ZCFKEY="+ZOHO_API_KEY+"&name=" + name + "&email=" + mail + "&dob=" + age + "&url=" + imgUrl + "&reply=" + senderEmail;
+                    instMailerLink = "https://project-rainfall-60026140571.development.catalystserverless.in/server/basicInsMailer/execute?ZCFKEY="+ZOHO_API_KEY+"&name=" + name + "&email=" + mail + "&age=" + age + "&url=" + imgUrl + "&reply=" + senderEmail;
                   }
                   else{
-                    instMailerLink = "https://project-rainfall-60026140571.development.catalystserverless.in/server/basicInsMailer/execute?ZCFKEY="+ZOHO_API_KEY+"&name=" + name + "&email=" + mail + "&dob=" + age  + "&reply=" + senderEmail;
+                    instMailerLink = "https://project-rainfall-60026140571.development.catalystserverless.in/server/basicInsMailer/execute?ZCFKEY="+ZOHO_API_KEY+"&name=" + name + "&email=" + mail + "&age=" + age  + "&reply=" + senderEmail;
                   }
 
                   let config = {
