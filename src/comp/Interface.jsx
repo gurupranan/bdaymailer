@@ -186,6 +186,7 @@ const [hist, setHist] = useState([]);
               console.log("ageeeee",age);
                   if(flag == "picpass"){
                     instMailerLink = "https://project-rainfall-60026140571.development.catalystserverless.in/server/basicInsMailer/execute?ZCFKEY="+ZOHO_API_KEY+"&name=" + name + "&email=" + mail + "&age=" + age + "&url=" + imgUrl + "&reply=" + senderEmail;
+                    flag = null;
                   }
                   else{
                     instMailerLink = "https://project-rainfall-60026140571.development.catalystserverless.in/server/basicInsMailer/execute?ZCFKEY="+ZOHO_API_KEY+"&name=" + name + "&email=" + mail + "&age=" + age  + "&reply=" + senderEmail;
