@@ -27,7 +27,7 @@ var credential;
 
 const SignIn = () => {
   const navigate = useNavigate();
-  const ZOHO_API_KEY = process.env.ZOHO_API_KEY;
+  const ZOHO_API_KEY = secrets.ZOHO_API_KEY;
 
   console.log(ZOHO_API_KEY);
   function signIn(event, navigate){
