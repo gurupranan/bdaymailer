@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "BdayMailer",
+  "name": "BdayMailer - Seamless birthday wishes",
   "icons": [
     {
       "src": "favicon.ico",
