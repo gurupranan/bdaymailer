@@ -21,7 +21,7 @@ const firebaseConfig = {
   appId: "1:767480013407:web:201a8d7b38a0f7c4c971ea",
   measurementId: "G-YSG0R407MB"
 };
-const ZOHO_API_KEY = "408d40335d752832ae57fcaad657a334"
+const ZOHO_API_KEY = process.env.ZOHO_API_KEY;
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
