@@ -250,7 +250,7 @@ useGoogleOneTapLogin({
 <br />
 <br />
 
-        Don't have an account? <Link to = "/" >Sign In</Link>
+        Already have an account? <Link to = "/" >Sign In</Link>
       </div>
     </div>
   );}
