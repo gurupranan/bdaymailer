@@ -3,6 +3,10 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, signInWithCredential } from 'firebase/auth';
 import { Link, useNavigate } from 'react-router-dom';
 import { getDatabase, ref, set } from 'firebase/database';
+import backImg from '../../src/signUp.png';
+import backImg1 from '../../src/star.png';
+import { collection, doc, getFirestore, setDoc } from 'firebase/firestore';
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyD27EFMpChpPEoTdwoN61TOzm9aU39K7f0",
@@ -16,7 +20,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
+const auth = getAuth(app);
+const fireStore = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 function validateEmail(newEmail) {
@@ -45,7 +50,7 @@ function signUp(event, navigate) {
   }
 
   createUserWithEmailAndPassword(auth, newEmail, newPassword)
-    .then(function (userCredential) {
+    .then(async function (userCredential) {
       var user = userCredential.user;
       
     // console.log("in");
@@ -55,6 +60,9 @@ function signUp(event, navigate) {
         set(ref(db, 'users/' + uid), {
           uid: uid,
           email: email
+        });
+        const userCollectionRef = collection(fireStore, "users");
+        const err = await setDoc(doc(userCollectionRef, uid), {
         });
         
           //console.log(auth.currentUser);
@@ -75,7 +83,7 @@ function signUpG(event, navigate){
   event.preventDefault();
 //console.log("genter");
   signInWithPopup(auth, provider)
-  .then((result) => {
+  .then(async (result) => {
     // This gives you a Google Access Token. You can use it to access the Google API.
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const token = credential.accessToken;
@@ -94,6 +102,9 @@ function signUpG(event, navigate){
     if(newUser){set(ref(db, 'users/' + uid), {
       uid: uid,
       email: email
+    });
+    const userCollectionRef = collection(fireStore, "users");
+    const err = await setDoc(doc(userCollectionRef, uid), {
     });
 
     
@@ -147,7 +158,7 @@ const SignUp = () => {
       const credential = GoogleAuthProvider.credential(idToken);
   
   
-      signInWithCredential(auth, credential).then((result)=>{
+      signInWithCredential(auth, credential).then(async (result)=>{
 
 
 //console.log("usersdvhjvsdf", JSON.stringify(result));
@@ -159,6 +170,10 @@ const SignUp = () => {
         if(newUser){set(ref(db, 'users/' + uid), {
           uid: uid,
           email: email
+        });
+
+        const userCollectionRef = collection(fireStore, "users");
+        const err = await setDoc(doc(userCollectionRef, uid), {
         });
 
         alert("Account created successfully")
@@ -191,7 +206,34 @@ const SignUp = () => {
     }
   }, []);
 
+
+  const containerStyle = {
+    backgroundImage: `url(${backImg})`,
+    backgroundSize: '100% 2%',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'left'// Set the height as per your design
+    // You can add more styles as needed
+  };
+  const containerStyle1 = {
+    display : "flex",
+    backgroundImage: `url(${backImg1})`,
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: '100% 100%'// Set the height as per your design
+    // You can add more styles as needed
+  };
+  const containerStyle2 = {
+    backgroundImage: `url(${backImg})`,
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'left'// Set the height as per your design
+    // You can add more styles as needed
+  };
+  
   return (
+    <div style={containerStyle}>
+<div style={containerStyle2}>
+<div style={containerStyle1}>
     <div style={{ margin: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
 
       {/* Left Section (60%) */}
@@ -200,7 +242,7 @@ const SignUp = () => {
       </div>
 
       {/* Right Section (40%) */}
-      <div style={{ marginRight:"5vw",  textAlign: 'center', border: '1px solid black', padding: '5vh', paddingTop: '2vh', paddingBottom: '8vh', background: '#f8f8f8' , borderRadius: '4px'}}>
+      <div style={{ marginRight:"5vw",  textAlign: 'center', border: '5px solid cyan', padding: '5vh', paddingTop: '2vh', paddingBottom: '8vh', background: '#F0FFFF' , borderRadius: '10px'}}>
         <h2>Sign Up</h2>
         <br />
         <form>
@@ -210,7 +252,7 @@ const SignUp = () => {
           <input type="password" id="newPassword" name="password" placeholder="Enter your password" style={{ width: '21vw', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', borderRadius: '4px', border: '1px solid black' }} />
           <br />
           <br />
-          <button id="sign-up" type="reset" onClick={(event)=>signUp(event, navigate)} style={{ width: '21vw', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9', borderRadius: '4px', border: '1px solid black' }}>Sign Up</button>
+          <button id="sign-up" type="reset" onClick={(event)=>signUp(event, navigate)} style={{ width: '21vw', cursor: 'pointer', border: '5px solid cyan',boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#00FFFF', borderRadius: '4px' }}>Sign Up</button>
           
           <br />
           <br />
@@ -252,6 +294,9 @@ useGoogleOneTapLogin({
 
         Already have an account? <Link to = "/" >Sign In</Link>
       </div>
+    </div>
+    </div>
+    </div>
     </div>
   );}
 

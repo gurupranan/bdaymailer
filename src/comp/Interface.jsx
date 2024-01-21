@@ -5,11 +5,13 @@ import { getAuth, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { getDownloadURL, getStorage, uploadBytes } from "firebase/storage"
 import { ref as rf } from "firebase/storage"
+import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, setDoc, updateDoc } from "firebase/firestore"
 import axios from "axios";
 
+import backImg from '../../src/popper1.png';
 
 
-
+//allsignup directory create in firestore --yet implement 
 
 const firebaseConfig = {
   apiKey: "AIzaSyD27EFMpChpPEoTdwoN61TOzm9aU39K7f0",
@@ -24,10 +26,10 @@ const firebaseConfig = {
 const ZOHO_API_KEY = "408d40335d752832ae57fcaad657a334"
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+var db = getDatabase(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
-
+const fireStore = getFirestore(app);
 
 
 var nav = false;
@@ -36,6 +38,7 @@ const Interface = () => {
 const navigate = useNavigate();
 const [persons, setPersons] = useState([]); //comp state data value as empty array
 const [hist, setHist] = useState([]);
+const [upcomingBday, setUpcomingBday] = useState([]);
 
 
     try{
@@ -48,12 +51,45 @@ const [hist, setHist] = useState([]);
     }
     const dbRef = ref(db, 'users/' + uId);
     
-    const fetchData = () => {
-      onValue(dbRef, (snapshot) => {
+    const fetchData = async () => {
+
+      onValue(dbRef, async (snapshot) => {
         const data = [];
         const histData = [];
+        const upcomingBday = [];
         var sno = 0;
-        var hisNo = 0
+        var hisNo = 0;
+        var upNo = 0;
+
+        const docRef = doc(fireStore, "users", uId);
+        const docSnap = await getDoc(docRef);
+        if(docSnap.exists()){        
+          const  allDob = docSnap.data()
+
+          for (const userId of Object.keys(allDob)){
+            const userDetails = allDob[userId];
+            if (typeof userDetails === 'object' && 'name' in userDetails && 'birth' in userDetails) {
+              const currentDate = new Date();
+              const dateString = userDetails.birth.slice(4,6)+userDetails.birth.slice(0,3)+getDateNow().slice(6,10)
+              const dateToCheck = new Date(dateString);
+              const timeDifference = dateToCheck - currentDate;
+              const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
+  console.log(currentDate, dateString,dateToCheck, timeDifference, daysDifference, )
+              if(daysDifference >= 0 && daysDifference <= 7){
+              upNo++
+              upcomingBday.push({ ...userDetails, sno: upNo });
+              }
+            } 
+          }}
+
+        // if (docSnap.exists()) {
+        //   console.log("Document data:", arr);
+        // } else {
+        //   // docSnap.data() will be undefined in this case
+        //   console.log("No such document!");
+        // }
+
+        
         snapshot.forEach((childSnapshot) => {
           sno = sno + 1;
           const childKey = childSnapshot.key;
@@ -74,11 +110,12 @@ const [hist, setHist] = useState([]);
     
         setPersons(data);
         setHist(histData);
+        setUpcomingBday(upcomingBday);
       });
     };
     
 
-  useEffect(() => {fetchData()}, [db]);
+  useEffect(() => {fetchData()}, [db, fireStore]);
   useEffect(() => {if(nav){navigate("/");}})  
 
 
@@ -152,7 +189,28 @@ const [hist, setHist] = useState([]);
                   email: mail,
                   birth: dob,
                 }).then(async ()=>{
-                  console.log("entered added")
+                  const userCollectionRef = collection(fireStore, "users");
+                  const err = await updateDoc(doc(userCollectionRef, uid), {
+                    [userId]: {
+                      name: name,
+                      birth: dob,
+                    }
+                  }).catch(async (e)=>{
+                    if(e.code.startsWith('not-found')){
+                      const userCollectionRef = collection(fireStore, "users");
+                      await setDoc(doc(userCollectionRef, uid), {
+                        [userId]: {
+                          name: name,
+                          birth: dob,
+                        }
+                      });
+                      fetchData();
+                    }
+                    
+                    console.log("start"+e+"end");
+                  })
+                  
+                  console.log("entered added", err)
 
                   if(pic){
                     await storeImage(uid, userId, blbPic).catch((e) => {
@@ -177,6 +235,7 @@ const [hist, setHist] = useState([]);
                             
                     })
                   }
+
                   alert("Data added");
                   const dateNow = getDateNow();
                   
@@ -219,7 +278,7 @@ const [hist, setHist] = useState([]);
                   })
       }
       else{
-        alert("Entered data in invalid");
+        alert("Entered data is invalid");
       }
     }
     else{
@@ -286,18 +345,25 @@ function handleFileUpload(files) {
   }
 }
 
-
+const containerStyle = {
+  backgroundImage: `url(${backImg})`,
+  backgroundSize: '100% 100%',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: '0% 0%'// Set the height as per your design
+  // You can add more styles as needed
+};
 
   return (
+<div style={containerStyle}>
     <div style={{height: '90vh', display: 'flex', flexDirection: 'column', margin: '5vh'}}>
       <div style={{flex: '0.25', display: 'flex', flexDirection: 'row'}}>
         <div style={{flex: '0.20',     display: 'flex',    flexDirection: 'column',    alignItems: 'left'}}>
           <form>
-          <input style={{marginBottom:'2vh', marginTop:'0.4vh', width:'25vw', height: '4.5vh', borderRadius: '4px' }} type="text" id="name" name="name" placeholder="Enter name *" />
+          <input style={{marginBottom:'2vh', marginTop:'0.4vh', width:'25vw', height: '4.5vh', borderRadius: '4px',  border: '1px solid black',}} type="text" id="name" name="name" placeholder="Enter name *" />
      
-          <input style={{marginBottom:'2vh', width:'25vw',height: '4.5vh' , borderRadius: '4px' }} type="email" id="mail" name="email" placeholder="Enter Email *" />
+          <input style={{marginBottom:'2vh', width:'25vw',height: '4.5vh' , borderRadius: '4px', border: '1px solid black', }} type="email" id="mail" name="email" placeholder="Enter Email *" />
      
-          <input style={{marginBottom:'2vh', width:'25vw',height: '4.5vh', borderRadius: '4px'  }} type="text" id="dob" name="date" placeholder="Enter Date of Birth *" onFocus={(e) => e.target.type = 'date'} />
+          <input style={{marginBottom:'2vh', width:'25vw',height: '4.5vh', borderRadius: '4px' , border: '1px solid black', }} type="text" id="dob" name="date" placeholder="Enter Date of Birth *" onFocus={(e) => e.target.type = 'date'} />
          
           {/* <button itemType='image' style={{marginBottom:'1.7vh', width:'25.5vw',backgroundColor: 'white', height: '5vh' , borderRadius: '4px' }} type="reset" id="addRecord" >Upload Image&nbsp;&nbsp;&#x1F4F7;&#x2B06;</button>
         */}
@@ -314,7 +380,7 @@ function handleFileUpload(files) {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: 'white',background: '#F0FFFF', border: '1px solid black',
     cursor: 'pointer',
     border: '2px solid black', // Added border style
     color: 'grey'
@@ -329,7 +395,7 @@ function handleFileUpload(files) {
       width: '100%',
       height: '100%',
       opacity: 0,
-      cursor: 'pointer',
+      cursor: 'pointer',background: '#F0FFFF',
     }}
     id="fileInput"
     onChange={(e) => handleFileUpload(e.target.files)}
@@ -337,24 +403,55 @@ function handleFileUpload(files) {
   <span id="uploadedFileNameLabel">Upload Image</span>&nbsp;&nbsp;&#x1F4F7;&#x2B06;
 </label>
 
-          <button style={{marginBottom:'2vh',width:'25.5vw',backgroundColor: '#d9d9d9', height: '5vh' , borderRadius: '4px' }} type="reset" id="addRecord" onClick={(event) => writeUserData(event)}>Add Record</button>
+          <button style={{marginBottom:'2vh',width:'25.5vw',height: '5vh' , borderRadius: '4px',background: '#00FFFF', border: '1px solid black', }} type="reset" id="addRecord" onClick={(event) => writeUserData(event)}>Add Record</button>
          </form>
 
         </div>
 
 
-        <div style={{flex: '0.80'}}>
+        <div style={{flex: '0.40'}}>
           
-          <div style={{ borderRadius: '4px',  background: '#d9d9d9', margin: '2vw', marginTop:'0vh', marginRight:'0vh' ,height: "35vh", overflow: "auto"}}>
+          <div style={{ borderRadius: '10px',  background: '#F0FFFF', border: '1vh solid cyan', margin: '2vw', marginTop:'0vh', marginRight:'0vh' ,height: "33.5vh", overflow: "auto"}}>
           {/* Content for the right half of the top section */}
-          <h2> &nbsp;&nbsp;&nbsp;&nbsp;History</h2>
+          <h2 style={{ position: "sticky", top: 2,  zIndex: 1, background:"#F0FFFF"}}> &nbsp;&nbsp;&nbsp;&nbsp;Upcoming birthdays</h2>
           <table id="person" style={{textAlign: 'left', margin: '8vh',  marginTop:'-2vh', borderRadius: '4px'}}>
           {hist ? (
-          <thead>
+          <thead style={{ position: "sticky", top: 34,  zIndex: 1, background:"#00FFFF"}}>
             <tr>
-             <th style={{width: '20vw'}}>S. No.</th>
-              <th style={{width: '20vw'}}>Name</th>
-              <th style={{width: '20vw'}}>Wished On</th>
+             <th style={{width: '5vw'}}>S. No.</th>
+              <th style={{width: '17vw'}}>Name</th>
+              <th style={{width: '8vw'}}>DOB</th>
+            </tr>
+          </thead>) : null}
+         
+          <tbody>
+            {upcomingBday.map((up) => (
+              <tr key={up.sno}>
+              <td>{up.sno}</td>
+              <td>{up.name}</td>
+              <td>{up.birth}</td>
+              </tr>
+              ))}
+  
+          </tbody>
+          </table>
+        </div>
+        </div>
+
+
+
+        <div style={{flex: '0.40'}}>
+          
+          <div style={{ borderRadius: '4px',  background: '#F0FFFF', border: '1px solid black', margin: '2vw', marginTop:'0vh', marginRight:'0vh' ,height: "35vh", overflow: "auto"}}>
+          {/* Content for the right half of the top section */}
+          <h2 style={{ position: "sticky", top: 2,  zIndex: 1, background:"#F0FFFF"}}> &nbsp;&nbsp;&nbsp;&nbsp;History</h2>
+          <table id="person" style={{textAlign: 'left', margin: '8vh',  marginTop:'-2vh', borderRadius: '4px'}}>
+          {hist ? (
+          <thead style={{ position: "sticky", top: 34,  zIndex: 1, background:"#00FFFF"}}>
+            <tr>
+             <th style={{width: '5vw'}}>S. No.</th>
+              <th style={{width: '17vw'}}>Name</th>
+              <th style={{width: '8vw'}}>Wished On</th>
             </tr>
           </thead>) : null}
          
@@ -366,11 +463,13 @@ function handleFileUpload(files) {
               <td>{his.lastupdated}</td>
               </tr>
               ))}
-  
           </tbody>
           </table>
         </div>
         </div>
+
+
+
       </div>
 
       <div style={{flex: '0.05'}}>
@@ -378,10 +477,10 @@ function handleFileUpload(files) {
 </div>
       <div style={{flex: '0.65'}}>
         {/* Content for the bottom section */}
-        <div style={{ borderRadius:'4px', textAlign: 'center',  marginTop: '-3vh',backgroundColor: '#d9d9d9', height: "40vh", overflow: "auto" }}>
+        <div style={{ borderRadius:'4px', textAlign: 'center',  marginTop: '-3vh',background: '#F0FFFF', border: '1px solid black', height: "40vh", overflowY: "auto" }}>
         <table id="person" style={{textAlign: 'left', margin: '1vh', borderRadius: '4px'}}>
           
-        <thead>
+        <thead style={{border: '2px solid #000', position: "sticky", top: 0,  zIndex: 1, background:"#00FFFF"}}>
           {persons ? (
             <tr>
               <th style={{width: '10vw'}}>S. No.</th>
@@ -399,7 +498,7 @@ function handleFileUpload(files) {
         <td>{person.name}</td>
         <td>{person.email}</td>
         <td>{person.birth}</td>
-        <td>{person.url ? (<a href={person.url}>Download</a>) : "No Image" }</td>
+        <td>{person.url ? (<a href={person.url} target="_blank">Download</a>) : "No Image" }</td>
       </tr>
     ))}
   
@@ -409,8 +508,9 @@ function handleFileUpload(files) {
       </div>
       </div>
      
-      <button style={{ borderRadius:'4px', width:'25vw', position: 'fixed', bottom: '3vh', right: '5vh', backgroundColor: '#d9d9d9', height: '40px' }} type="submit" onClick={(event) => logOut(event, navigate)} id="logout">Log Out</button>
+      <button style={{ borderRadius:'4px', width:'25vw', position: 'fixed', bottom: '3vh', right: '5vh', background: '#00FFFF', border: '1px solid black', height: '40px' }} type="submit" onClick={(event) => logOut(event, navigate)} id="logout">Log Out</button>
       
+    </div>
     </div>
     
   );

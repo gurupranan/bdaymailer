@@ -3,8 +3,9 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider, signInWithCredential, getAdditionalUserInfo, deleteUser} from "firebase/auth";
 import { Link, useNavigate } from 'react-router-dom';
 import { getDatabase, ref, set } from 'firebase/database';
-
-
+import backImg from '../../src/side.png';
+import backImg1 from '../../src/tag.png';
+import { collection, doc, getFirestore, setDoc } from 'firebase/firestore';
 
 
 const firebaseConfig = {
@@ -20,7 +21,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const provider = new GoogleAuthProvider();
-var auth = getAuth();
+var auth = getAuth(app);
+const fireStore = getFirestore(app);
 var credential;
 
 
@@ -41,7 +43,8 @@ const SignIn = () => {
     .then(function(userCredential){
       var auth = getAuth();
       var user = auth.currentUser;
-      navigate("/add_record");
+      console.log("ysercreds",userCredential);
+      navigate("/add_record");//
     }).catch((error) =>{
       console.log(error);
       alert("Email / Password is wrong");
@@ -55,6 +58,7 @@ const SignIn = () => {
   //console.log("genter");
     signInWithPopup(auth, provider)
     .then((result) => {
+      console.log("res",result)
       // This gives you a Google Access Token. You can use it to access the Google API.
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential.accessToken;
@@ -115,7 +119,7 @@ const SignIn = () => {
       const credential = GoogleAuthProvider.credential(idToken);
   
   
-      signInWithCredential(auth, credential).then((result)=>{
+      signInWithCredential(auth, credential).then(async (result)=>{
 
 
 
@@ -127,6 +131,9 @@ const SignIn = () => {
         if(newUser){set(ref(db, 'users/' + uid), {
           uid: uid,
           email: email
+        });
+        const userCollectionRef = collection(fireStore, "users");
+        const err = await setDoc(doc(userCollectionRef, uid), {
         });
 
         alert("Account created successfully")
@@ -158,18 +165,33 @@ const SignIn = () => {
       delete window.oneTapAutoLogin;
     }
   }, []);
+  const containerStyle = {
+    backgroundImage: `url(${backImg})`,
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'left'// Set the height as per your design
+    // You can add more styles as needed
+  };
+  const containerStyle1 = {
+    backgroundImage: `url(${backImg1})`,
+    backgroundSize: '50vh ',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'top right'// Set the height as per your design
+    // You can add more styles as needed
+  };
 
-  
   return (
-
+  
+<div style={containerStyle}>
+<div style={containerStyle1}>
     <div style={{ margin: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
       {/* Left Section (60%) */}
-      <div style={{ width: '60vw', textAlign: 'center' }}>
+      <div style={{ fontFamily: 'Cursive', width: '60vw', textAlign: 'center' }}>
         <h1> Wish your friends and family <br />Happy Birthday!</h1>
       </div>
 
       {/* Right Section (40%) */}
-      <div style={{ marginRight:"5vw",  textAlign: 'center', border: '1px solid black', padding: '5vh', paddingTop: '2vh', paddingBottom: '8vh', background: '#f8f8f8' , borderRadius: '4px'}}>
+      <div style={{ marginRight:"5vw",  textAlign: 'center', border: '5px solid cyan', padding: '5vh', paddingTop: '2vh', paddingBottom: '8vh', background: '#F0FFFF' , borderRadius: '10px'}}>
         <h2>Sign In</h2>
         <br />
         <form>
@@ -179,7 +201,7 @@ const SignIn = () => {
           <input type="password" id="pswd" name="password" placeholder="Enter your password" style={{ width: '21vw', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', borderRadius: '4px', border: '1px solid black' }} />
           <br />
           <br />
-          <button id="sign-in" type="reset" onClick={(event)=>signIn(event, navigate)} style={{ width: '21vw', cursor: 'pointer', boxSizing: 'border-box', marginBottom: '10px', padding: '5px', background: '#d9d9d9', borderRadius: '4px', border: '1px solid black' }}>Sign In</button>
+          <button id="sign-in" type="reset" onClick={(event)=>signIn(event, navigate)} style={{ width: '21vw', cursor: 'pointer', boxSizing: 'border-box', border: '5px solid cyan',marginBottom: '10px', padding: '5px', background: '#00FFFF', borderRadius: '4px' }}>Sign In</button>
           <br />
           <Link to = "/forgotpass" >Forgot Password?</Link>
           <br />
@@ -223,6 +245,8 @@ useGoogleOneTapLogin({
 
         Don't have an account? <Link to = "/signup" >Sign Up</Link>
       </div>
+    </div>
+    </div>
     </div>
   );
 }
